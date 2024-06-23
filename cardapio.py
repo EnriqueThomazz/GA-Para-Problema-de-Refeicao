@@ -43,7 +43,7 @@ def criaRefeicao():
 def criaCardapio():
     cardapio = []
 
-    for _ in range(7): cardapio.append(criaRefeicao())
+    for _ in range(tam_cardapio): cardapio.append(criaRefeicao())
 
     return cardapio
 
@@ -51,6 +51,7 @@ def criaCardapio():
 def fitnessCardapio(cardapio):
     # Quanto menor a fitness, mais adequado é
     dif = 0
+    custo_total = 0
     ing_rep = []
     for refeicao in cardapio:
         for nut in list(qtd_por_ref.keys()):
@@ -59,15 +60,24 @@ def fitnessCardapio(cardapio):
 
         # Adiciona à dif o custo do prato
         dif += refeicao["valor_nutricional"]["custo"]
+        custo_total += refeicao["valor_nutricional"]["custo"]
 
         # Verifica repetições, adiciona cada elemento único na lista
         for ingr in refeicao["refeicao"]:
             if ingr["nome"] not in ing_rep:
                 ing_rep.append(ingr["nome"])
 
+            # Penalizando se escolher um ingrediente a ser evitado
+            if ingr["nome"] in ingr_evitados:
+                dif += penalizacao
+
     # Fitness calculada como o grau de diferença mais a qtd de ingredientes repetidos (quanto maior a lista de ingr_rep, melhor)
 
-    fitness = dif + 7 * (2 + 1 + 3) - len(ing_rep)
+    fitness = dif + tam_cardapio * (2 + 1 + 3) - len(ing_rep)
+
+    # Se estourou o orçamento, penaliza
+    if custo_total > orcamento:
+        fitness += penalizacao
 
     return fitness
 
@@ -145,14 +155,3 @@ def start():
 
 
 start()
-
-
-# Coisas interessantes a serem implementados (???)
-
-# Permitir uma escolha fracionária de ingredientes
-# Permitir uma penalização para ingredientes (no caso de alguma pessoa não comer alguma coisa)
-
-# Coisas a fazer (!!!)
-
-# Permitir uma mutação a nível de ingrediente
-# Brincar com os rates de mutação e crossover e ver como isso impacta no resultado
